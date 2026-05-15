@@ -97,13 +97,18 @@ cd ..\..
 
 ## 7. 개발 서버 실행
 
-저장소 루트에서:
+이 가이드의 권장 실행 명령(포트 **3001**):
 
 ```powershell
-bun dev:web
+cd apps\web
+bun node_modules/next/dist/bin/next dev --port 3001
 ```
 
-[http://localhost:3000](http://localhost:3000) 에서 OpenCut이 열립니다.
+[http://localhost:3001](http://localhost:3001) 에서 OpenCut이 열립니다.
+
+> **왜 3001인가요?** 포트 3000은 다른 dev 서버나 백그라운드 앱(예: 일부 데스크톱 앱의 내장 웹서버)이 흔히 차지하고 있어 충돌 가능성이 높습니다. 또한 위 명령은 Next를 **Bun 런타임으로 직접 실행**해서 Node 25 환경에서 발생하는 Turbopack 워커 크래시(트러블슈팅 #1 참고)도 자동으로 회피합니다.
+>
+> 원본 저장소의 표준 명령은 `bun dev:web`(포트 3000)이며, Node LTS + 포트 3000 가용 환경에서는 그대로 동작합니다.
 
 ---
 
@@ -114,8 +119,10 @@ bun dev:web
 docker compose down
 
 # 다시 시작
+cd C:\Users\User\OpenCut
 docker compose up -d db redis serverless-redis-http
-bun dev:web
+cd apps\web
+bun node_modules/next/dist/bin/next dev --port 3001
 ```
 
 볼륨(`postgres_data`)은 그대로 유지되므로 DB 데이터는 보존됩니다.
@@ -146,20 +153,22 @@ winget install --id OpenJS.NodeJS.LTS -e
 설치 후 모든 터미널을 닫고 다시 시도하세요.
 
 **B. Next를 Bun 런타임으로 직접 실행 (Node를 건드리지 않는 회피책)**
-```powershell
-cd apps\web
-bun node_modules/next/dist/bin/next dev --port 3000
-```
-Bun이 PostCSS 워커도 자신의 런타임으로 처리하여 크래시가 사라집니다.
 
-### 2) 포트 3000이 이미 점유됨 (`EADDRINUSE`)
-
-다른 포트로 실행:
+이 가이드의 7단계 명령이 정확히 이 회피책을 적용한 것입니다:
 ```powershell
 cd apps\web
 bun node_modules/next/dist/bin/next dev --port 3001
 ```
-이후 [http://localhost:3001](http://localhost:3001) 로 접속하세요.
+Bun이 PostCSS 워커도 자신의 런타임으로 처리하여 크래시가 사라집니다.
+
+### 2) 포트 3001도 점유됨 (`EADDRINUSE`)
+
+이 가이드의 기본 포트는 3001입니다. 그마저 다른 프로세스가 쓰고 있다면 임의의 빈 포트로 바꿔주세요(예: 3002).
+```powershell
+cd apps\web
+bun node_modules/next/dist/bin/next dev --port 3002
+```
+이후 [http://localhost:3002](http://localhost:3002) 로 접속하세요.
 
 ### 3) `db:push:local` 실패 — `No schema files found for path config ['./src/lib/db/schema.ts']`
 
